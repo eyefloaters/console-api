@@ -31,6 +31,7 @@ import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import com.github.eyefloaters.console.api.model.Either;
 import com.github.eyefloaters.console.api.model.OffsetInfo;
 import com.github.eyefloaters.console.api.model.Topic;
+import com.github.eyefloaters.console.api.support.KafkaOffsetSpec;
 
 @ApplicationScoped
 public class TopicService {
@@ -253,10 +254,10 @@ public class TopicService {
 
     CompletionStage<Void> listOffsets(Admin adminClient, Map<Uuid, Either<Topic, Throwable>> topics, String offsetSpec) {
         OffsetSpec reqOffsetSpec = switch (offsetSpec) {
-            case "earliest"     -> OffsetSpec.earliest();
-            case "latest"       -> OffsetSpec.latest();
-            case "maxTimestamp" -> OffsetSpec.maxTimestamp();
-            default             -> OffsetSpec.forTimestamp(Instant.parse(offsetSpec).toEpochMilli());
+            case KafkaOffsetSpec.EARLIEST -> OffsetSpec.earliest();
+            case KafkaOffsetSpec.LATEST -> OffsetSpec.latest();
+            case KafkaOffsetSpec.MAX_TIMESTAMP -> OffsetSpec.maxTimestamp();
+            default -> OffsetSpec.forTimestamp(Instant.parse(offsetSpec).toEpochMilli());
         };
 
         Map<String, Uuid> topicIds = new HashMap<>();
