@@ -20,9 +20,9 @@ import jakarta.validation.Payload;
 
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ValidStringList.Validator.class)
+@Constraint(validatedBy = StringEnumeration.Validator.class)
 @Documented
-public @interface ValidStringList {
+public @interface StringEnumeration {
     String message() default "list contains an invalid value";
 
     Class<?>[] groups() default {};
@@ -35,12 +35,12 @@ public @interface ValidStringList {
 
     String source() default "";
 
-    static class Validator implements ConstraintValidator<ValidStringList, List<String>> {
+    static class Validator implements ConstraintValidator<StringEnumeration, List<String>> {
 
         final Set<String> allowedValues = new HashSet<>();
 
         @Override
-        public void initialize(ValidStringList annotation) {
+        public void initialize(StringEnumeration annotation) {
             allowedValues.addAll(Arrays.asList(annotation.allowedValues()));
         }
 

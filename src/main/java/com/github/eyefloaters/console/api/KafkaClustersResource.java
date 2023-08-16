@@ -27,7 +27,7 @@ import com.github.eyefloaters.console.api.model.KafkaCluster;
 import com.github.eyefloaters.console.api.service.KafkaClusterService;
 import com.github.eyefloaters.console.api.support.ErrorCategory;
 import com.github.eyefloaters.console.api.support.FieldFilter;
-import com.github.eyefloaters.console.api.support.ValidStringList;
+import com.github.eyefloaters.console.api.support.StringEnumeration;
 
 @Path("/api/kafkas")
 @Tag(name = "Kafka Cluster Resources")
@@ -54,7 +54,7 @@ public class KafkaClustersResource {
     public Response listClusters(
             @QueryParam(FIELDS_PARAM)
             @DefaultValue(KafkaCluster.Fields.LIST_DEFAULT)
-            @ValidStringList(
+            @StringEnumeration(
                     source = FIELDS_PARAM,
                     allowedValues = {
                         KafkaCluster.Fields.NAME,
@@ -97,7 +97,7 @@ public class KafkaClustersResource {
 
             @QueryParam(FIELDS_PARAM)
             @DefaultValue(KafkaCluster.Fields.DESCRIBE_DEFAULT)
-            @ValidStringList(
+            @StringEnumeration(
                     source = FIELDS_PARAM,
                     allowedValues = {
                         KafkaCluster.Fields.NAME,

@@ -30,7 +30,7 @@ import com.github.eyefloaters.console.api.support.ErrorCategory;
 import com.github.eyefloaters.console.api.support.FieldFilter;
 import com.github.eyefloaters.console.api.support.KafkaOffsetSpec;
 import com.github.eyefloaters.console.api.support.KafkaUuid;
-import com.github.eyefloaters.console.api.support.ValidStringList;
+import com.github.eyefloaters.console.api.support.StringEnumeration;
 
 @Path("/api/kafkas/{clusterId}/topics")
 @Tag(name = "Kafka Cluster Resources")
@@ -77,7 +77,7 @@ public class TopicsResource {
     public CompletionStage<Response> listTopics(
             @QueryParam(FIELDS_PARAM)
             @DefaultValue(Topic.Fields.LIST_DEFAULT)
-            @ValidStringList(
+            @StringEnumeration(
                     source = FIELDS_PARAM,
                     allowedValues = {
                         Topic.Fields.NAME,
@@ -139,7 +139,7 @@ public class TopicsResource {
 
             @QueryParam(FIELDS_PARAM)
             @DefaultValue(Topic.Fields.DESCRIBE_DEFAULT)
-            @ValidStringList(
+            @StringEnumeration(
                     source = FIELDS_PARAM,
                     allowedValues = {
                         Topic.Fields.NAME,
