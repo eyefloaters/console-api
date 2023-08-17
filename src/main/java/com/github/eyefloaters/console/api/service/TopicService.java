@@ -21,7 +21,6 @@ import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.DescribeTopicsOptions;
 import org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo;
 import org.apache.kafka.clients.admin.OffsetSpec;
-import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.TopicCollection;
 import org.apache.kafka.common.Uuid;
 import org.apache.kafka.common.config.ConfigResource;
@@ -277,12 +276,14 @@ public class TopicService {
         var result = adminClient.listOffsets(request);
         var pendingOffsets = request.keySet().stream()
                 .map(topicPartition -> result.partitionResult(topicPartition)
-                        .whenComplete((offsetResult, error) ->
-                        addOffset(topics.get(topicIds.get(topicPartition.topic())).getPrimary(),
-                                    topicPartition.partition(),
-                                    offsetResult,
-                                    error)))
-                .map(KafkaFuture::toCompletionStage)
+                        .toCompletionStage()
+                        .<Void>handle((offsetResult, error) -> {
+                            addOffset(topics.get(topicIds.get(topicPartition.topic())).getPrimary(),
+                                        topicPartition.partition(),
+                                        offsetResult,
+                                        error);
+                            return null;
+                        }))
                 .map(CompletionStage::toCompletableFuture)
                 .toArray(CompletableFuture[]::new);
 
