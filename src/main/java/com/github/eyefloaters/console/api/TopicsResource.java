@@ -49,6 +49,10 @@ public class TopicsResource {
     @Named("requestedFields")
     Consumer<List<String>> requestedFields;
 
+    @Parameter(description = "Cluster identifier")
+    @PathParam("clusterId")
+    String clusterId;
+
 //    @POST
 //    @Consumes(MediaType.APPLICATION_JSON)
 //    @Produces(MediaType.APPLICATION_JSON)

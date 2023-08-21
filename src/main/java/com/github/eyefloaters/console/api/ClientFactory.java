@@ -98,8 +98,10 @@ public class ClientFactory {
             .map(l -> buildConfiguration(cluster, l))
             .orElseThrow(noSuchKafka);
 
-        log.debug("AdminClient configuration:");
-        config.entrySet().forEach(entry -> log.debugf("\t%s = %s", entry.getKey(), entry.getValue()));
+        if (log.isDebugEnabled()) {
+            log.debug("AdminClient configuration:");
+            config.entrySet().forEach(entry -> log.debugf("\t%s = %s", entry.getKey(), entry.getValue()));
+        }
 
         Admin client = adminBuilder.apply(config);
         return () -> client;
@@ -116,7 +118,7 @@ public class ClientFactory {
 
         switch (authType) {
             case "oauth":
-                log.info("OAuth enabled");
+                log.debug("OAuth enabled");
                 saslEnabled = true;
                 config.put(SaslConfigs.SASL_MECHANISM, "OAUTHBEARER");
                 config.put(SaslConfigs.SASL_LOGIN_CALLBACK_HANDLER_CLASS, "io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler");
@@ -136,7 +138,7 @@ public class ClientFactory {
 
                 break;
             case "plain":
-                log.info("SASL/PLAIN from HTTP Basic authentication enabled");
+                log.debug("SASL/PLAIN from HTTP Basic authentication enabled");
                 saslEnabled = true;
                 config.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
 
@@ -149,7 +151,7 @@ public class ClientFactory {
 
                 break;
             default:
-                log.info("Broker authentication/SASL disabled");
+                log.debug("Broker authentication/SASL disabled");
                 saslEnabled = false;
                 break;
         }
