@@ -43,13 +43,14 @@ kubectl patch deployment -n ingress-nginx ingress-nginx-controller \
 
 ### Install Strimzi and Kafka Cluster
 
-Create the Strimzi Operator artifacts and a Kafka cluster in the `myproject` namespace.
+Create the Strimzi Operator artifacts and two Kafka clusters in the `myproject` namespace.
 
 ```shell
 kubectl create namespace myproject
 curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.36.1/strimzi-cluster-operator-0.36.1.yaml | kubectl apply -f - -n myproject
 kubectl wait deployment strimzi-cluster-operator -n myproject --for condition=Available
-sed -e 's/\${cluster_name}/my-cluster/g' -e 's/\${kube_ip}/'$(minikube ip)'/g' examples/kafka-ephemeral-ingress.yaml | kubectl apply -f - -n myproject
+sed -e 's/\${cluster_name}/cluster-a/g' -e 's/\${kube_ip}/'$(minikube ip)'/g' examples/kafka-ephemeral-ingress.yaml | kubectl apply -f - -n myproject
+sed -e 's/\${cluster_name}/cluster-b/g' -e 's/\${kube_ip}/'$(minikube ip)'/g' examples/kafka-ephemeral-ingress.yaml | kubectl apply -f - -n myproject
 ```
 
 ### Start Console API in Development Mode
