@@ -1,6 +1,8 @@
 package com.github.eyefloaters.console.api.model;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,46 +11,13 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.eyefloaters.console.api.support.ComparatorBuilder;
+
+import static java.util.Comparator.comparing;
 
 @Schema(name = "TopicAttributes")
 @JsonFilter("fieldFilter")
 public class Topic {
-
-    public static final class Fields {
-        public static final String NAME = "name";
-        public static final String INTERNAL = "internal";
-        public static final String PARTITIONS = "partitions";
-        public static final String AUTHORIZED_OPERATIONS = "authorizedOperations";
-        public static final String CONFIGS = "configs";
-
-        public static final String LIST_DEFAULT = NAME + ", " + INTERNAL;
-        public static final String DESCRIBE_DEFAULT =
-                NAME + ", " + INTERNAL + ", " + PARTITIONS + ", " + AUTHORIZED_OPERATIONS;
-
-        private Fields() {
-        }
-    }
-
-    @Schema(name = "TopicListResponse")
-    public static final class ListResponse extends DataListResponse<TopicResource> {
-        public ListResponse(List<Topic> data) {
-            super(data.stream().map(TopicResource::new).toList());
-        }
-    }
-
-    @Schema(name = "TopicResponse")
-    public static final class SingleResponse extends DataResponse<TopicResource> {
-        public SingleResponse(Topic data) {
-            super(new TopicResource(data));
-        }
-    }
-
-    @Schema(name = "Topic")
-    public static final class TopicResource extends Resource<Topic> {
-        public TopicResource(Topic data) {
-            super(data.id, "topics", data);
-        }
-    }
 
     String name;
     boolean internal;
@@ -132,4 +101,56 @@ public class Topic {
     public Either<Map<String, ConfigEntry>, Error> getConfigs() {
         return configs;
     }
+
+    public static final class Fields {
+        public static final String NAME = "name";
+        public static final String INTERNAL = "internal";
+        public static final String PARTITIONS = "partitions";
+        public static final String AUTHORIZED_OPERATIONS = "authorizedOperations";
+        public static final String CONFIGS = "configs";
+
+        static final Comparator<Topic> ID_COMPARATOR =
+                comparing(Topic::getId);
+
+        static final Map<String, Map<Boolean, Comparator<Topic>>> COMPARATORS = ComparatorBuilder.bidirectional(
+                Map.of("id", ID_COMPARATOR, NAME, comparing(Topic::getName)));
+
+        public static final String LIST_DEFAULT = NAME + ", " + INTERNAL;
+        public static final String DESCRIBE_DEFAULT =
+                NAME + ", " + INTERNAL + ", " + PARTITIONS + ", " + AUTHORIZED_OPERATIONS;
+
+        private Fields() {
+            // Prevent instances
+        }
+
+        public static Comparator<Topic> defaultComparator() {
+            return ID_COMPARATOR;
+        }
+
+        public static Comparator<Topic> comparator(String fieldName, boolean descending) {
+            return COMPARATORS.getOrDefault(fieldName, Collections.emptyMap()).get(descending);
+        }
+    }
+
+    @Schema(name = "TopicListResponse")
+    public static final class ListResponse extends DataListResponse<TopicResource> {
+        public ListResponse(List<Topic> data) {
+            super(data.stream().map(TopicResource::new).toList());
+        }
+    }
+
+    @Schema(name = "TopicResponse")
+    public static final class SingleResponse extends DataResponse<TopicResource> {
+        public SingleResponse(Topic data) {
+            super(new TopicResource(data));
+        }
+    }
+
+    @Schema(name = "Topic")
+    public static final class TopicResource extends Resource<Topic> {
+        public TopicResource(Topic data) {
+            super(data.id, "topics", data);
+        }
+    }
+
 }

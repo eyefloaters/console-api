@@ -50,8 +50,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.KubernetesServerTestResource;
 import io.strimzi.api.kafka.model.Kafka;
-import io.strimzi.api.kafka.model.KafkaBuilder;
-import io.strimzi.api.kafka.model.listener.arraylistener.KafkaListenerType;
 
 import static com.github.eyefloaters.console.test.TestHelper.whenRequesting;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -109,55 +107,12 @@ class TopicsResourceIT {
         clusterId2 = UUID.randomUUID().toString();
 
         client.resources(Kafka.class).delete();
-        client.resources(Kafka.class).resource(new KafkaBuilder()
-                .withNewMetadata()
-                    .withName("test-kafka1")
-                .endMetadata()
-                .withNewSpec()
-                    .withNewKafka()
-                        .addNewListener()
-                            .withName("listener0")
-                            .withType(KafkaListenerType.NODEPORT)
-                        .endListener()
-                    .endKafka()
-                .endSpec()
-                .withNewStatus()
-                    .withClusterId(clusterId1)
-                    .addNewListener()
-                        .withName("listener0")
-                        .addNewAddress()
-                            .withHost(bootstrapServers.getHost())
-                            .withPort(bootstrapServers.getPort())
-                        .endAddress()
-                    .endListener()
-                .endStatus()
-                .build())
+        client.resources(Kafka.class)
+            .resource(utils.buildKafkaResource("test-kafka1", clusterId1, bootstrapServers))
             .create();
-
         // Second cluster is offline/non-existent
-        client.resources(Kafka.class).resource(new KafkaBuilder()
-                .withNewMetadata()
-                    .withName("test-kafka2")
-                .endMetadata()
-                .withNewSpec()
-                    .withNewKafka()
-                        .addNewListener()
-                            .withName("listener0")
-                            .withType(KafkaListenerType.NODEPORT)
-                        .endListener()
-                    .endKafka()
-                .endSpec()
-                .withNewStatus()
-                    .withClusterId(clusterId2)
-                    .addNewListener()
-                        .withName("listener0")
-                        .addNewAddress()
-                            .withHost(randomBootstrapServers.getHost())
-                            .withPort(randomBootstrapServers.getPort())
-                        .endAddress()
-                    .endListener()
-                .endStatus()
-                .build())
+        client.resources(Kafka.class)
+            .resource(utils.buildKafkaResource("test-kafka2", clusterId2, randomBootstrapServers))
             .create();
     }
 

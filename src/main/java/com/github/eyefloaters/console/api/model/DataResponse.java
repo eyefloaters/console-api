@@ -1,6 +1,6 @@
 package com.github.eyefloaters.console.api.model;
 
-public abstract class DataResponse<T> {
+public abstract class DataResponse<T extends Resource<?>> {
 
     private final T data;
 
