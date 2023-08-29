@@ -120,10 +120,10 @@ public class TopicsResource {
             @Parameter(
                     schema = @Schema(ref = "OffsetSpec"),
                     examples = {
-                        @ExampleObject(ref = "Earliest Offset"),
-                        @ExampleObject(ref = "Latest Offset"),
-                        @ExampleObject(ref = "Max Timestamp"),
-                        @ExampleObject(ref = "Literal Timestamp")
+                        @ExampleObject(ref = "EarliestOffset"),
+                        @ExampleObject(ref = "LatestOffset"),
+                        @ExampleObject(ref = "MaxTimestamp"),
+                        @ExampleObject(ref = "LiteralTimestamp")
                     })
             String offsetSpec,
 
@@ -191,10 +191,10 @@ public class TopicsResource {
             @Parameter(
                     schema = @Schema(ref = "OffsetSpec"),
                     examples = {
-                        @ExampleObject(ref = "Earliest Offset"),
-                        @ExampleObject(ref = "Latest Offset"),
-                        @ExampleObject(ref = "Max Timestamp"),
-                        @ExampleObject(ref = "Literal Timestamp")
+                        @ExampleObject(ref = "EarliestOffset"),
+                        @ExampleObject(ref = "LatestOffset"),
+                        @ExampleObject(ref = "MaxTimestamp"),
+                        @ExampleObject(ref = "LiteralTimestamp")
                     })
             String offsetSpec) {
 
