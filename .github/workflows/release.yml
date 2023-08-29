@@ -34,9 +34,6 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Setup Docker
-        uses: docker-practice/actions-setup-docker@v1
-
       - name: Perform Maven Release
         run: |
           git config --global user.name "bf2robot"
