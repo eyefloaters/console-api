@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response.Status;
@@ -35,6 +36,8 @@ import org.eclipse.microprofile.config.Config;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.stubbing.Answer;
 
 import com.github.eyefloaters.console.kafka.systemtest.TestPlainProfile;
@@ -57,6 +60,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasKey;
@@ -275,6 +279,63 @@ class TopicsResourceIT {
             .body("data.attributes.partitions[0][0].offset.timestamp", is(second.toString()));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "'name', 't1,t2,t3,t4,t5'",
+        "'-name', 't5,t4,t3,t2,t1'"
+    })
+    void testListTopicsSortedByName(String sortParam, String expectedNameList) {
+        String randomSuffix = UUID.randomUUID().toString();
+
+        List<String> topicNames = IntStream.rangeClosed(1, 5)
+                .mapToObj(i -> "t" + i + "-" + randomSuffix)
+                .collect(Collectors.toList());
+
+        topicUtils.createTopics(clusterId1, topicNames, 1);
+
+        String[] expectedNames = Stream.of(expectedNameList.split(","))
+                .map(name -> name + "-" + randomSuffix)
+                .toArray(String[]::new);
+
+        whenRequesting(req -> req.queryParam("sort", sortParam).get("", clusterId1))
+            .assertThat()
+            .statusCode(is(Status.OK.getStatusCode()))
+            .body("data.size()", equalTo(topicNames.size()))
+            .body("data.attributes.name", contains(expectedNames));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'name', 't1,t2,t3,t4,t5'",
+        "'-name', 't5,t4,t3,t2,t1'"
+    })
+    void testListClustersSortedWithPagination(String sortParam, String expectedNameList) {
+        String randomSuffix = UUID.randomUUID().toString();
+
+        List<String> topicNames = IntStream.rangeClosed(1, 5)
+                .mapToObj(i -> "t" + i + "-" + randomSuffix)
+                .collect(Collectors.toList());
+
+        topicUtils.createTopics(clusterId1, topicNames, 1);
+
+        String[] expectedNames = Stream.of(expectedNameList.split(","))
+                .map(name -> name + "-" + randomSuffix)
+                .toArray(String[]::new);
+
+        for (int i = 0, m = expectedNames.length; i < m; i++) {
+            int pageNumber = i + 1;
+            whenRequesting(req -> req
+                    .queryParam("sort", sortParam)
+                    .queryParam("page[size]", 1)
+                    .queryParam("page[number]", pageNumber)
+                    .get("", clusterId1))
+                .assertThat()
+                .statusCode(is(Status.OK.getStatusCode()))
+                .body("meta.page.total", equalTo(topicNames.size()))
+                .body("data.size()", equalTo(1))
+                .body("data.attributes.name", contains(expectedNames[i]));
+        }
+    }
 
     @Test
     void testDescribeTopicWithNameAndConfigsIncluded() {

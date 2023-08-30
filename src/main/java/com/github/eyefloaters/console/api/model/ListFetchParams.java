@@ -48,24 +48,12 @@ public class ListFetchParams {
         return sort;
     }
 
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
-
     public String getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(String pageSize) {
-        this.pageSize = pageSize;
-    }
-
     public String getPageNumber() {
         return pageNumber;
-    }
-
-    public void setPageNumber(String pageNumber) {
-        this.pageNumber = pageNumber;
     }
 
 }

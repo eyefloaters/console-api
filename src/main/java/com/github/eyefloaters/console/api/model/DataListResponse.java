@@ -14,6 +14,14 @@ public abstract class DataListResponse<T extends Resource<?>> {
         this.data = data;
     }
 
+    static <V> Map<String, V> put(Map<String, V> map, String key, V value) {
+        if (map == null) {
+            map = new LinkedHashMap<>();
+        }
+        map.put(key, value);
+        return map;
+    }
+
     public List<T> getData() {
         return data;
     }
@@ -23,10 +31,7 @@ public abstract class DataListResponse<T extends Resource<?>> {
     }
 
     public void addMeta(String key, Object value) {
-        if (meta == null) {
-            meta = new LinkedHashMap<>();
-        }
-        meta.put(key, value);
+        meta = put(meta, key, value);
     }
 
     public Map<String, String> getLinks() {
@@ -34,9 +39,6 @@ public abstract class DataListResponse<T extends Resource<?>> {
     }
 
     public void addLink(String key, String value) {
-        if (links == null) {
-            links = new LinkedHashMap<>();
-        }
-        links.put(key, value);
+        links = put(links, key, value);
     }
 }
