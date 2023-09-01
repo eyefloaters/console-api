@@ -68,7 +68,8 @@ public class ConfigEntry {
      * {@code value} field.
      *
      * <p>Numeric fields will be parsed before comparison, passwords will always compare
-     * as equal, and other types will be compared as strings.
+     * as equal (to avoid potential information leakage), and other types will be
+     * compared as strings.
      *
      * <p>This method assumes that both ConfigEntry objects have the same type and
      * that neither has a null value.
