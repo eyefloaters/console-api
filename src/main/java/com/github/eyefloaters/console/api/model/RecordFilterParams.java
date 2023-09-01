@@ -3,48 +3,53 @@ package com.github.eyefloaters.console.api.model;
 import java.time.Instant;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 
-import com.github.eyefloaters.console.legacy.model.Types.Record;
+import com.github.eyefloaters.console.api.support.ErrorCategory;
+import com.github.eyefloaters.console.api.support.RangeLimitedInteger;
 
 public class RecordFilterParams {
 
-    public static final String PROP_LIMIT = "limit";
-    public static final String PROP_MAX_VALUE_LENGTH = "maxValueLength";
-
-    @QueryParam(Record.PROP_PARTITION)
+    @QueryParam("filter[partition]")
     @Parameter(description = "Retrieve messages only from this partition")
-    Integer partition;
+    @RangeLimitedInteger(min = "0", category = ErrorCategory.INVALID_QUERY_PARAMETER, source = "filter[partition]")
+    String partition;
 
-    @QueryParam(Record.PROP_OFFSET)
-    @Parameter(description = "Retrieve messages with an offset equal to or greater than this offset. If both `timestamp` and `offset` are requested, `timestamp` is given preference.")
-    @Min(0)
-    Integer offset;
+    @QueryParam("filter[offset]")
+    @Parameter(description = """
+            Retrieve messages with an offset equal to or greater than this offset.
+            If both `filter[timestamp]` and `filter[offset]` are requested, `filter[timestamp]`
+            is given preference.
+            """)
+    @RangeLimitedInteger(min = "0", category = ErrorCategory.INVALID_QUERY_PARAMETER, source = "filter[offset]")
+    String offset;
 
-    @QueryParam(Record.PROP_TIMESTAMP)
+    @QueryParam("filter[timestamp]")
     @Parameter(
-        description = "Retrieve messages with a timestamp equal to or later than this timestamp. If both `timestamp` and `offset` are requested, `timestamp` is given preference.",
+        description = """
+            Retrieve messages with a timestamp equal to or later than this timestamp.
+            If both `filter[timestamp]` and `filter[offset]` are requested, `filter[timestamp]`
+            is given preference.
+            """,
         schema = @Schema(format = "date-time"))
     String timestamp;
 
-    @QueryParam(PROP_LIMIT)
+    @QueryParam("page[size]")
     @DefaultValue("20")
     @Parameter(description = "Limit the number of records fetched and returned")
-    @Positive
-    Integer limit;
+    @RangeLimitedInteger(category = ErrorCategory.INVALID_QUERY_PARAMETER, source = "page[size]")
+    String limit;
 
-    @QueryParam(PROP_MAX_VALUE_LENGTH)
+    @QueryParam("maxValueLength")
     @Parameter(description = "Maximum length of string values returned in the response. "
             + "Values with a length that exceeds this parameter will be truncated. When this parameter is not "
             + "included in the request, the full string values will be returned.")
-    @Positive
-    Integer maxValueLength;
+    @RangeLimitedInteger(category = ErrorCategory.INVALID_QUERY_PARAMETER, source = "maxValueLength")
+    String maxValueLength;
 
     @AssertTrue(message = "invalid timestamp")
     public boolean isTimestampValid() {
@@ -60,42 +65,22 @@ public class RecordFilterParams {
     }
 
     public Integer getPartition() {
-        return partition;
+        return partition != null ? Integer.parseInt(partition) : null;
     }
 
-    public void setPartition(Integer partition) {
-        this.partition = partition;
+    public Long getOffset() {
+        return offset != null ? Long.parseLong(offset) : null;
     }
 
-    public Integer getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Integer offset) {
-        this.offset = offset;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public Instant getTimestamp() {
+        return timestamp != null ? Instant.parse(timestamp) : null;
     }
 
     public Integer getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Integer limit) {
-        this.limit = limit;
+        return limit != null ? Integer.parseInt(limit) : null;
     }
 
     public Integer getMaxValueLength() {
-        return maxValueLength;
-    }
-
-    public void setMaxValueLength(Integer maxValueLength) {
-        this.maxValueLength = maxValueLength;
+        return maxValueLength != null ? Integer.parseInt(maxValueLength) : null;
     }
 }
