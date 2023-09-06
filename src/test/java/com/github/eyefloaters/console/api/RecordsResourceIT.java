@@ -148,12 +148,12 @@ class RecordsResourceIT {
 
     @ParameterizedTest
     @ValueSource(ints = { -1, 0 })
-    void testConsumeRecordWithInvalidLimit(int limit) {
+    void testConsumeRecordWithInvalidPageSize(int pageSize) {
         final String topicName = UUID.randomUUID().toString();
         var topicIds = topicUtils.createTopics(clusterId1, List.of(topicName), 2);
 
         whenRequesting(req -> req
-                .queryParam("page[size]", limit)
+                .queryParam("page[size]", pageSize)
                 .get("", clusterId1, topicIds.get(topicName)))
             .assertThat()
             .statusCode(is(Status.BAD_REQUEST.getStatusCode()))
@@ -176,11 +176,34 @@ class RecordsResourceIT {
         recordUtils.produceRecord(topicName, ts2, null, "the-key2", "the-value2");
 
         whenRequesting(req -> req
-                .queryParam("filter[timestamp]", tsSearch.toString())
+                .queryParam("filter[timestamp]", "gte," + tsSearch.toString())
                 .get("", clusterId1, topicIds.get(topicName)))
             .assertThat()
             .statusCode(is(Status.OK.getStatusCode()))
             .body("data", hasSize(expectedResults));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "2000-01-01T00:00:00.000Z, 2000-01-02T00:00:00.000Z, 2000-01-01T00:00:00.000Z",
+        "2000-01-01T00:00:00.000Z, 2000-01-02T00:00:00.000Z, eq,2000-01-02T00:00:00.000Z",
+        "2000-01-01T00:00:00.000Z, 2000-01-02T00:00:00.000Z, gte,1969-12-31T23:59:59.999Z"
+    })
+    void testConsumeRecordsAsOfInvalidTimestamp(Instant ts1, Instant ts2, String tsSearch) {
+        final String topicName = UUID.randomUUID().toString();
+        var topicIds = topicUtils.createTopics(clusterId1, List.of(topicName), 2);
+        recordUtils.produceRecord(topicName, ts1, null, "the-key1", "the-value1");
+        recordUtils.produceRecord(topicName, ts2, null, "the-key2", "the-value2");
+
+        whenRequesting(req -> req
+                .queryParam("filter[timestamp]", tsSearch)
+                .get("", clusterId1, topicIds.get(topicName)))
+            .assertThat()
+            .statusCode(is(Status.BAD_REQUEST.getStatusCode()))
+            .body("errors.size()", is(1))
+            .body("errors.status", contains("400"))
+            .body("errors.code", contains("4001"))
+            .body("errors.source.parameter", contains("filter[timestamp]"));
     }
 
     @ParameterizedTest
@@ -200,11 +223,36 @@ class RecordsResourceIT {
 
         whenRequesting(req -> req
                 .queryParam("filter[partition]", 0)
-                .queryParam("filter[offset]", startingOffset)
+                .queryParam("filter[offset]", "gte," + startingOffset)
                 .get("", clusterId1, topicIds.get(topicName)))
             .assertThat()
             .statusCode(is(Status.OK.getStatusCode()))
             .body("data", hasSize(expectedResults));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1",
+        "gte,-1",
+        "eq,2"
+    })
+    void testConsumeRecordsByInvalidStartingOffset(String startingOffset) {
+        final String topicName = UUID.randomUUID().toString();
+        var topicIds = topicUtils.createTopics(clusterId1, List.of(topicName), 1); // single partition
+        for (int i = 0; i < 3; i++) {
+            recordUtils.produceRecord(topicName, null, null, "the-key-" + i, "the-value-" + i);
+        }
+
+        whenRequesting(req -> req
+                .queryParam("filter[partition]", 0)
+                .queryParam("filter[offset]", startingOffset)
+                .get("", clusterId1, topicIds.get(topicName)))
+            .assertThat()
+            .statusCode(is(Status.BAD_REQUEST.getStatusCode()))
+            .body("errors.size()", is(1))
+            .body("errors.status", contains("400"))
+            .body("errors.code", contains("4001"))
+            .body("errors.source.parameter", contains("filter[offset]"));
     }
 
     @ParameterizedTest
