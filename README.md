@@ -1,3 +1,7 @@
+# Archived
+
+_As of 2023-09-07, this project is being developed in the [eyefloaters/console](https://github.com/eyefloaters/console) repository._
+
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eyefloaters_console-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=eyefloaters_console-api) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=eyefloaters_console-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=eyefloaters_console-api)
 
 # Console API
